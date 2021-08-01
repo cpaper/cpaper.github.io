@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>The Evolvtion of X JSON Viewer | cpaper|未来异化</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Developer’s notes about X JSON Viewer. The developer wants to make a versatile and handy JSON Viewer &amp; Formatter app for macOS. How can we get it rendered smoothly and be handy for loading or savi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Evolvtion of X JSON Viewer">
+<meta property="og:url" content="http://cpaper.github.io/apps/about-x-json-viewer/index.html">
+<meta property="og:site_name" content="cpaper|未来异化">
+<meta property="og:description" content="Developer’s notes about X JSON Viewer. The developer wants to make a versatile and handy JSON Viewer &amp; Formatter app for macOS. How can we get it rendered smoothly and be handy for loading or savi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://user-images.githubusercontent.com/23731576/125311472-0382b880-e366-11eb-9470-b050e6453c35.png">
+<meta property="article:published_time" content="2021-07-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-08-01T05:55:46.230Z">
+<meta property="article:author" content="capper">
+<meta property="article:tag" content="app">
+<meta property="article:tag" content="json">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://user-images.githubusercontent.com/23731576/125311472-0382b880-e366-11eb-9470-b050e6453c35.png">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+
+<meta name="generator" content="Hexo 5.1.1"></head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <div class="outer">
+        <section id="main"><article id="post-apps/about-x-json-viewer" class="article article-type-post" itemscope itemprop="blogPost">
+  
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      The Evolvtion of X JSON Viewer
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/apps/about-x-json-viewer/" class="article-date">
+  <time datetime="2021-07-09T16:00:00.000Z" itemprop="datePublished">2021-07-10</time>
+</a>
+      
+    </div>
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Developer’s notes about <strong>X JSON Viewer</strong>. The developer wants to make a versatile and handy JSON Viewer &amp; Formatter app for macOS. How can we get it rendered smoothly and be handy for loading or saving data? How can we choose the WebKit or native rendering technology for displaying contents?  Here are ideas and programming thinking from the app developer.</p>
+<a id="more"></a>
+
+<h2 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h2><ul>
+<li>Load JSON data in versatile ways: user inputs, dragging a file or request a API</li>
+<li>Pretty syntax highlight</li>
+<li>Tree view</li>
+<li>Level view</li>
+<li>Clearly show child count</li>
+<li>Save and reload data from &amp; to history list</li>
+<li>Export JSON data to a local file</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>JSON is a widely applied data format for interchanging data. Developers get used to it here and there in their daily development work. Viewing JSON data in a intuitional and easy way is a key point for debugging. I find some online JSON tools are quite usefull. </p>
+<p>These tools are online services, which means their can not be accessed when you are offline. As they are implemented in browsers, the UI will not scroll smoothly when viewing large JSON data(10M bytes e.g.). For me, the key pain is that I can save the data to keep a history for later usage.</p>
+<p>A screenshot of <strong>X JSON Viewer</strong> from appstore:<br><img width="1280" alt="2 0 0-light" src="https://user-images.githubusercontent.com/23731576/125311472-0382b880-e366-11eb-9470-b050e6453c35.png"></p>
+<h2 id="The-desirable-features"><a href="#The-desirable-features" class="headerlink" title="The desirable features"></a>The desirable features</h2><p>The required features may support to:</p>
+<ol>
+<li>JSON syntax highlighting</li>
+<li>expand or collapse any single node</li>
+<li>toggle nodes in quick level-base way</li>
+<li>process large JSON files smoothly</li>
+<li>load JSON data in as many as possible ways: from the pastebord, from local disk files or by requesting API</li>
+<li>Users can save or export hisotory data items</li>
+</ol>
+<h2 id="Roadmaps-for-various-technical-implementations"><a href="#Roadmaps-for-various-technical-implementations" class="headerlink" title="Roadmaps for various technical implementations"></a>Roadmaps for various technical implementations</h2><h3 id="How-can-we-implement-this-JSON-Viewer"><a href="#How-can-we-implement-this-JSON-Viewer" class="headerlink" title="How can we implement this JSON Viewer?"></a>How can we implement this JSON Viewer?</h3><p>Before I jump into coding, I design the technology roadmaps for feasible implementations from the easiest(but less perfect) to the hardest(more desirable) efforts. I give this a name <code>X JSON Viewer</code>. Here are indispensible UI components by my initial design:  </p>
+<ol start="0">
+<li><p>Should implement the tool as a native app, more precisely as a MacOS catelyst app(since I am fimilar with developing iOS apps)</p>
+<p> for storing history data locally, for loading data from or exporting data into local disk files</p>
+</li>
+<li><p>Use a textView for user inputs or editing the text.</p>
+</li>
+</ol>
+<h3 id="Viewing"><a href="#Viewing" class="headerlink" title="Viewing"></a>Viewing</h3><p>The most important part of this tool is to help view JSON data more efficently. Here is the evolvtion about polishing view experience.</p>
+<p><strong>1. Use a webview to render the formatted JSON strings with <code>hightlight.js</code> and <code>JavaScriptWebBridge</code></strong></p>
+<p>This is the quickest way to get the JSON rendered in a formated and colorfull way. It can be finished with little efforts by reusing the open-sourced <code>hightlight.js</code>. <code>JavaScriptWebBridge</code> is required for messaging between the native and the web environments.</p>
+<p>It is indeed easy to implement. That is the initital version for my app <code>X JSON viewer</code> in the AppStore</p>
+<p><strong>2. Use a custom WKURLSchemeHandler to message large JSON data</strong></p>
+<p>As <code>UIWebView</code> has been rejected when submitting new apps to AppStore, we have to use <code>WKWebView</code>. In WKWebView, it is finally possible to intercept custom scheme requests which is perfect for sending large data. What may disappointe you a little is that the custom scheme handler feature requires SDK at lease iOS 11.</p>
+<p><strong>3. Use native TableView and AttributedString to render JSON output</strong></p>
+<p>Although now we can send large data to the webview, but large text rendered in webview does not scroll smoothly. This the weakless of plain web contents. To my understanding, large text rendering may be easied up a little by appying React.js to simulate native UITableView’s view reuse. So why should’t we just use native UI to render these strings? Finally I come to this solution for better performance.</p>
+<p><strong>4. Use SQLite for storing history data</strong></p>
+<p>I use the <code>YapDatabase</code> framework to store data as history items quickly in a key-value store. </p>
+<p>You are welcome to try this little paid app from AppStore <a target="_blank" rel="noopener" href="https://apps.apple.com/us/app/x-json-viewer/id1572237462">X JSON Viewer</a>. Send me an email <code>cutclip@outlook.com</code> for a promotion code for this app if you are interested about it.</p>
+<p>Tips: With a promotion code for a paid app from AppStore, you can enter the code and then install the app without charing fees.</p>
+
+      
+
+      
+        
+    </div>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/intj/intj-cassini/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          INTJ：卡西尼号的未见与已定
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+
+      </div>
+      <footer id="footer">
+  
+	<div id="footer-info" class="inner">
+	  &copy; 2021 capper 
+	  - Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+	  - Theme <a href="https://github.com/hejianxian/hexo-theme-jane/" target="_blank">Jane</a>
+	</div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/works" class="mobile-nav-link">Works</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  </div>
+</body>
+</html>
